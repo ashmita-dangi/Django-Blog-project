@@ -1,9 +1,11 @@
-from django.shortcuts import render,HttpResponseRedirect
-from .forms import SignUpForm, LoginForm, BlogForm
+from django.shortcuts import render, get_object_or_404, redirect
+from .forms import SignUpForm, LoginForm, BlogForm, CommentForm  # Ensure CommentForm is imported
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from .models import Blog
+from .models import Blog, Post, Comment  # Import Post and Comment models
 from django.contrib.auth.models import Group
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseRedirect
 
 # Create your views here.
 def home(request):
@@ -97,3 +99,28 @@ def contact(request):
     return render(request, 'blog/contact.html')
 
 # Create your views here.
+
+# # from django.shortcuts import render, get_object_or_404, redirect
+# from .models import Post, Comment
+# # from .forms import CommentForm
+# from django.contrib.auth.decorators import login_required
+
+
+@login_required
+def post_detail(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    comments = post.comments.all()
+    new_comment = None
+
+    if request.method == 'POST':
+        comment_form = CommentForm(data=request.POST)
+        if comment_form.is_valid():
+            new_comment = comment_form.save(commit=False)
+            new_comment.post = post
+            new_comment.author = request.user
+            new_comment.save()
+            return redirect('post_detail', post_id=post.id)
+    else:
+        comment_form = CommentForm()
+
+    return render(request, 'blog/post_detail.html', {'post': post, 'comments': comments, 'new_comment': new_comment, 'comment_form': comment_form})

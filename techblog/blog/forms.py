@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, UsernameField
 from django.contrib.auth.models import User
 from django.utils.translation import gettext, gettext_lazy as _
-from .models import Blog
+from .models import Blog, Comment
 
 class SignUpForm(UserCreationForm):
     password1 = forms.CharField(label="Password", widget=forms.PasswordInput(attrs = {'class':'form-control'}))
@@ -28,3 +28,11 @@ class BlogForm(forms.ModelForm):
         fields = ['title','cont']
         labels = {'title':'Title','cont':'Content'}
         widgets = {'title':forms.TextInput(attrs={'class':'form-control'}),'cont':forms.Textarea(attrs={'class':'form-control'})}
+        
+# from django import forms
+
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['content']
